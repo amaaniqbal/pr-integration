@@ -1,6 +1,6 @@
-# Contributing to Issue Progress Custom Field
+# Contributing to PR Integration Forge App
 
-Thank you for considering a contribution to Forge Issue Progress Custom Field! 
+Thank you for considering a contribution to PR Integration Forge App! 
 Pull requests, issues and comments are welcome. For pull requests, please:
 
 * Add tests for new features and bug fixes

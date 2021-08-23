@@ -1,8 +1,8 @@
 modules:
   jira:customField:
-    - key: risk-assessment-custom-field
-      name: Risk Assessment
-      description: The risk of the issue, from low to high
+    - key: contribution-custom-field
+      name: Contribution
+      description: This field open the modal to enter PR and QA Owner details.
       edit:
         function: edit
       type: string

@@ -13,5 +13,8 @@ modules:
     - key: edit
       handler: index.renderFieldEdit
 app:
-  id: ari:cloud:ecosystem::app/bbeb7089-326b-4164-9a6b-464b560aa102
-  name: Risk Assessment
+  id: ari:cloud:ecosystem::app/809c0abc-d7aa-4bf4-92c2-bff5ee33055b
+  name: github-integration
+permissions:
+  scopes:
+    - write:jira-work

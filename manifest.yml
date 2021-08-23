@@ -14,7 +14,7 @@ modules:
       handler: index.renderFieldEdit
 app:
   id: ari:cloud:ecosystem::app/809c0abc-d7aa-4bf4-92c2-bff5ee33055b
-  name: github-integration
+  name: pr-integration
 permissions:
   scopes:
     - write:jira-work

@@ -3,27 +3,15 @@ import ForgeUI, {
     useProductContext,
     CustomField,
     CustomFieldEdit, 
-    Text, 
-    Select, 
-    Option, 
-    StatusLozenge, 
-    Fragment 
+    Text,
+    TextField,
+    UserPicker,
+    Toggle, 
+    Fragment, 
 } from "@forge/ui";
+import api from "@forge/api";
 
 const View = () => {
-    const getLozengeApperance = (riskLevel) => {
-        switch (riskLevel) {
-            case 'low':
-                return 'success';
-            case 'medium':
-                return 'inprogress';
-            case 'high':
-                return 'removed';
-            default:
-                return 'default'
-        }
-    }
-
     const {
         extensionContext: { fieldValue },
     } = useProductContext();
@@ -31,38 +19,72 @@ const View = () => {
     return (
         <CustomField>
             <Text>
-                <StatusLozenge text={fieldValue || 'None'} appearance={getLozengeApperance(fieldValue)} />
+                {fieldValue || 'None'}
             </Text>
         </CustomField>
     );
 };
 
 const Edit = () => {
-    const onSubmit = (formValue) => {
-        const riskValue = formValue.impact * formValue.likelihood;
+    const {
+        platformContext: { issueKey }
+    } = useProductContext();
+      
+    const sendEmailToQAOwner = async (qaOwner, notifyBody) => {
+        const body = {
+            htmlBody: notifyBody,
+            subject: "A Pull Request Require Your QA!",
+            to: {
+                voters: true,
+                watchers: true,
+                groups: [
+                    {
+                        name: "jira-software-users"
+                    }       
+                ],
+                reporter: true,
+                assignee: false,
+                users: [
+                    {
+                        accountId: qaOwner,
+                    }
+                ],
+            },
+            restrict: {
+                permissions: [],
+                groups: [],
+            },
+        };
 
-        if (riskValue <= 2) {
-            return 'low';
-        } else if (riskValue > 2 && riskValue < 6) {
-            return 'medium';
-        } else {
-            return 'high'
-        }
+        const response = await api
+            .asUser()
+            .requestJira(`/rest/api/3/issue/${issueKey}/notify`, {
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            });
+            
+        console.log(response);
+    };
+    
+    const onSubmit = (formValue) => {        
+        // Notify the QA Owner if one exists
+        const wipText = formValue.isWIP ? "This PR is currently under development." : ""; 
+        const notifyBody = `Pull Request for Ticket ${issueKey} is now available at ${formValue.prLink}. ${wipText}`;
+        sendEmailToQAOwner(formValue.qaOwner, notifyBody);   
+
+        return formValue.prLink;
     }
 
     return (
-        <CustomFieldEdit onSubmit={onSubmit} header="Select risk" width="medium" >
+        <CustomFieldEdit onSubmit={onSubmit} header="Enter contribution details" width="medium" >
             <Fragment>
-                <Select label="Impact" name="impact" isRequired>
-                    <Option label="low" value="1" />
-                    <Option label="medium" value="2" />
-                    <Option label="high" value="3" />
-                </Select>
-                <Select label="Likelihood" name="likelihood" isRequired>
-                    <Option label="low" value="1" />
-                    <Option label="medium" value="2" />
-                    <Option label="high" value="3" />
-                </Select>
+                <TextField label="Pull Request Link" name="prLink" isRequired />
+                <UserPicker label="QA Owner" name="qaOwner" />
+                <Toggle label="WIP?" name="isWIP" />
             </Fragment>
         </CustomFieldEdit>
     );
